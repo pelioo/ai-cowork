@@ -8,6 +8,10 @@ TypeScript monorepo：双 Agent 结对编程工作台（Coder + Reviewer），�
 - 快照回滚（Checkpoint）：一键保存/回滚工作区
 - 危险命令拦截：15 类破坏性命令实时阻断并重定向
 
+## 协作规范
+
+- 没有用户的允许与提示，git 不允许私自暂存与提交文件。
+
 ## Packages
 
 | Package | 路径 | 职责 |
