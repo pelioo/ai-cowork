@@ -1,8 +1,15 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+// @ts-ignore - vite-plugin-monaco-editor 类型定义不完整
+import monacoEditorPlugin from "vite-plugin-monaco-editor";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    (monacoEditorPlugin as any).default({
+      languageWorkers: ["editorWorkerService", "typescript", "json"],
+    }),
+  ],
   server: {
     port: 3000,
     host: "0.0.0.0",
