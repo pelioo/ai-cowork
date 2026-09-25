@@ -980,8 +980,36 @@ function resolveModel(spec: string): Model<"openai-completions"> | undefined {
     });
   }
 
-  // 内置 provider 走 getModel（anthropic/openai/google/openrouter/...），cast 成 openai-completions 仅用于类型通过
-  const builtins = ["anthropic", "google", "openai", "groq", "cerebras", "xai", "zai", "mistral", "github-copilot", "openrouter"];
+  // openai: 支持自定义 baseURL（如第三方兼容服务）
+  if (provider === "openai") {
+    if (!config.openaiKey) return undefined;
+    if (!id) return undefined;
+    if (config.openaiBaseUrl) {
+      // 校验 URL 格式有效性
+      try {
+        new URL(config.openaiBaseUrl);
+      } catch {
+        console.warn(`[config] Invalid OPENAI_BASE_URL format: ${config.openaiBaseUrl}, falling back to official API`);
+        const m = getModel("openai" as any, id as any);
+        return m ? (m as unknown as Model<"openai-completions">) : undefined;
+      }
+      return makeOpenAICompatModel({
+        provider: "openai",
+        id,
+        name: id,
+        baseUrl: config.openaiBaseUrl,
+        apiKey: config.openaiKey,
+        contextWindow: 128000,
+        maxTokens: 16384,
+      });
+    }
+    // 默认走官方 API
+    const m = getModel("openai" as any, id as any);
+    return m ? (m as unknown as Model<"openai-completions">) : undefined;
+  }
+
+  // 内置 provider 走 getModel（anthropic/google/openrouter/...），cast 成 openai-completions 仅用于类型通过
+  const builtins = ["anthropic", "google", "groq", "cerebras", "xai", "zai", "mistral", "github-copilot", "openrouter"];
   if (builtins.includes(provider)) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const m = getModel(provider as any, id as any);

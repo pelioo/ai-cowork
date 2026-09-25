@@ -23,6 +23,7 @@ export const config = {
   anthropicKey: process.env.ANTHROPIC_API_KEY?.trim() || undefined,
   deepseekKey: process.env.DEEPSEEK_API_KEY?.trim() || undefined,
   openaiKey: process.env.OPENAI_API_KEY?.trim() || undefined,
+  openaiBaseUrl: process.env.OPENAI_BASE_URL?.trim() || undefined,
   defaultModel: process.env.AICOWORK_DEFAULT_MODEL?.trim() || undefined,
   authToken: process.env.AICOWORK_AUTH_TOKEN?.trim() || undefined,
   host: process.env.AICOWORK_HOST?.trim() || "127.0.0.1",
