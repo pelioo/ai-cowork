@@ -16,3 +16,6 @@ data/*
 
 # 运行时本地数据（Agent 在 cwd 下创建的快照等）
 .aicowork/
+
+# Agent 协作工具配置文件
+.reasonix/
