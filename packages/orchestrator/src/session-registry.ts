@@ -19,7 +19,7 @@ import * as PV from "./preview-server.js";
 
 export interface StartOptions {
   cwd: string;
-  prompt: string;
+  prompt?: string;
   model?: string;
   /** 是否同时启动 reviewer（结对编程），默认 true */
   review?: boolean;
@@ -266,16 +266,18 @@ export class SessionRegistry {
     // 异步触发首轮 prompt，不阻塞响应
     // plan 模式：注入「先出计划」系统提示，强制 Coder 只规划不执行
     const firstPrompt = permissionMode === "plan"
-      ? `【计划模式】你现在处于只读计划模式，只能用 read/grep/glob/ls 探索代码。\n\n请针对以下任务，先输出一份结构化 markdown 计划，包含：\n## 目标\n## 实现步骤（编号列表）\n## 涉及文件\n## 风险与注意事项\n\n输出计划后停止，不要尝试修改任何文件（你的 write/edit/bash 工具已被禁用）。等待用户批准后再执行。\n\n任务：${opts.prompt}`
+      ? `【计划模式】你现在处于只读计划模式，只能用 read/grep/glob/ls 探索代码。\n\n请针对以下任务，先输出一份结构化 markdown 计划，包含：\n## 目标\n## 实现步骤（编号列表）\n## 涉及文件\n## 风险与注意事项\n\n输出计划后停止，不要尝试修改任何文件（你的 write/edit/bash 工具已被禁用）。等待用户批准后再执行。\n\n任务：${opts.prompt ?? ""}`
       : opts.prompt;
-    session.prompt(firstPrompt).catch((err: unknown) => {
-      this.broadcast({
-        sessionId,
-        type: "error",
-        code: "E_PROMPT",
-        message: err instanceof Error ? err.message : String(err),
+    if (firstPrompt) {
+      session.prompt(firstPrompt).catch((err: unknown) => {
+        this.broadcast({
+          sessionId,
+          type: "error",
+          code: "E_PROMPT",
+          message: err instanceof Error ? err.message : String(err),
+        });
       });
-    });
+    }
 
     return { sessionId, model: modelId, reviewer: wantReview, permissionMode };
   }
@@ -297,6 +299,13 @@ export class SessionRegistry {
     if (!entry) throw new Error(`session not found: ${sessionId}`);
     entry.aborted = true;
     await entry.session.abort();
+  }
+
+  setPermissionMode(sessionId: string, mode: PermissionMode): void {
+    const entry = this.sessions.get(sessionId);
+    if (!entry) throw new Error(`session not found: ${sessionId}`);
+    entry.permissionMode = mode;
+    this.broadcast({ sessionId, type: "permission.updated", permissionMode: mode });
   }
 
   async prompt(sessionId: string, message: string, streamingBehavior?: "steer" | "followUp"): Promise<void> {

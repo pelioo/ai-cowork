@@ -14,6 +14,7 @@ import {
   ClientCommand,
   type CommandResponse,
   type ServerEvent,
+  type PermissionMode,
 } from "@ai-cowork/shared";
 import { config } from "./config.js";
 import { SessionRegistry } from "./session-registry.js";
@@ -248,7 +249,7 @@ async function handleCommand(cmd: ClientCommand, reply: (r: CommandResponse) => 
           prompt: cmd.prompt,
           model: cmd.model,
           review: (cmd as { review?: boolean }).review,
-          permissionMode: (cmd as { permissionMode?: "free" | "read-only" | "plan" }).permissionMode,
+          permissionMode: (cmd as { permissionMode?: PermissionMode }).permissionMode,
         });
         const dataObj: { sessionId: string; model?: string; reviewer?: boolean; permissionMode: string } = { sessionId, model, reviewer, permissionMode };
         reply({ id: cmd.id, type: "response", command: cmd.type, success: true, data: dataObj });
@@ -267,6 +268,15 @@ async function handleCommand(cmd: ClientCommand, reply: (r: CommandResponse) => 
         await registry.abort(cmd.sessionId);
         reply({ id: cmd.id, type: "response", command: cmd.type, success: true });
         break;
+      case "permission.update": {
+        try {
+          registry.setPermissionMode(cmd.sessionId, cmd.permissionMode);
+          reply({ id: cmd.id, type: "response", command: cmd.type, success: true });
+        } catch (err) {
+          reply({ id: cmd.id, type: "response", command: cmd.type, success: false, error: String(err) });
+        }
+        break;
+      }
       case "prompt":
         await registry.prompt(cmd.sessionId, cmd.message, cmd.streamingBehavior);
         reply({ id: cmd.id, type: "response", command: cmd.type, success: true });

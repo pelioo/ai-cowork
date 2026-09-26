@@ -9,16 +9,29 @@ import { z } from "zod";
 
 const base = z.object({ id: z.string() });
 
+/** 权限模式：free=全开 / read-only=只读+白名单bash / plan=只读须先出计划 */
+export const PermissionMode = z.enum(["free", "read-only", "plan"]);
+export type PermissionMode = z.infer<typeof PermissionMode>;
+
+/** 动态切换会话的权限模式 */
+export const PermissionUpdateCommand = base.extend({
+  type: z.literal("permission.update"),
+  sessionId: z.string(),
+  permissionMode: PermissionMode,
+});
+export type PermissionUpdateCommand = z.infer<typeof PermissionUpdateCommand>;
+
 export const StartSessionCommand = base.extend({
   type: z.literal("session.start"),
   cwd: z.string(),
-  prompt: z.string(),
+  /** 初始任务（可选，不传则等待用户在 InputBar 输入） */
+  prompt: z.string().optional(),
   /** 形如 "deepseek/deepseek-chat" / "anthropic/claude-sonnet-4-5"；省略则用默认 model */
   model: z.string().optional(),
   /** 是否同时启动独立的 Reviewer Agent（结对编程）。默认 true：主 Agent 每个 turn 结束后 Reviewer 独立审查，发现严重问题以 follow_up 注入主 Agent */
   review: z.boolean().optional(),
   /** 权限模式：free=全开(默认) / read-only=只读+白名单bash / plan=只读且须先出计划。开源安全防护。 */
-  permissionMode: z.enum(["free", "read-only", "plan"]).optional(),
+  permissionMode: PermissionMode.optional(),
 });
 
 export const SteerCommand = base.extend({
@@ -123,6 +136,7 @@ export const PlanApproveCommand = base.extend({
 
 export const ClientCommand = z.discriminatedUnion("type", [
   StartSessionCommand,
+  PermissionUpdateCommand,
   SteerCommand,
   FollowUpCommand,
   AbortCommand,
@@ -175,10 +189,6 @@ const sessionIdField = { sessionId: z.string() };
 /** Agent 角色：主编码 / 审查者 / 副驾驶 */
 export const AgentRole = z.enum(["coder", "reviewer", "copilot"]);
 export type AgentRole = z.infer<typeof AgentRole>;
-
-/** 权限模式：free=全开 / read-only=只读+白名单bash / plan=只读须先出计划 */
-export const PermissionMode = z.enum(["free", "read-only", "plan"]);
-export type PermissionMode = z.infer<typeof PermissionMode>;
 
 /** Copilot 对话消息（一条用户消息或一条 Copilot 回复） */
 export const CopilotMessage = z.object({
@@ -339,6 +349,8 @@ export const ServerEvent = z.discriminatedUnion("type", [
     /** 反馈文本（iterate 时） */
     feedback: z.string().optional(),
   }),
+  /** 权限模式动态切换成功 */
+  z.object({ ...sessionIdField, type: z.literal("permission.updated"), permissionMode: PermissionMode }),
 ]);
 
 export type ServerEvent = z.infer<typeof ServerEvent>;

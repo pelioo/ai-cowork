@@ -156,6 +156,7 @@ interface CoworkState {
   setSession: (id: string | null, model?: string, reviewer?: boolean, permissionMode?: PermissionMode) => void;
   setStreaming: (b: boolean) => void;
   setQueue: (s: number, f: number) => void;
+  setPermissionMode: (mode: PermissionMode) => void;
   append: (entry: LogEntry) => void;
   setFiles: (files: FileEntry[]) => void;
   setCurrentPath: (path: string | null) => void;
@@ -215,6 +216,7 @@ export const useStore = create<CoworkState>((set, get) => ({
   setSession: (id, model, reviewer, permissionMode) => set({ sessionId: id, model, reviewer: reviewer ?? false, permissionMode: permissionMode ?? "free" }),
   setStreaming: (b) => set({ isStreaming: b }),
   setQueue: (s, f) => set({ steeringCount: s, followUpCount: f }),
+  setPermissionMode: (mode) => set({ permissionMode: mode }),
   append: (entry) => {
     const log = get().log;
     const last = log[log.length - 1];

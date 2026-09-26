@@ -59,6 +59,8 @@ function open() {
     } catch {
       return;
     }
+    // response 是命令响应（不等同于 ServerEvent），单独处理
+    if ((msg as { type: string }).type === "response") return;
     handleEvent(msg as ServerEvent);
   };
 }
@@ -231,6 +233,10 @@ function handleEvent(ev: ServerEvent) {
           : `🔁 计划需修改${ev.feedback ? `：${ev.feedback}` : ""}`;
         s.append({ kind: "lifecycle", type: label, ts: Date.now() });
       }
+      break;
+    case "permission.updated":
+      s.setPermissionMode(ev.permissionMode);
+      s.append({ kind: "lifecycle", type: `🔒 权限已切换为 ${ev.permissionMode === "free" ? "全开" : ev.permissionMode === "read-only" ? "只读" : "计划模式"}`, ts: Date.now() });
       break;
     default:
       // 未处理的事件类型，记录警告便于调试
