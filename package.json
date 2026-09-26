@@ -22,6 +22,10 @@
     "dev:orch": "npm run dev -w @ai-cowork/orchestrator",
     "dev:web": "npm run dev -w @ai-cowork/web",
     "build:shared": "npm run build -w @ai-cowork/shared",
-    "build": "npm run build:shared && npm run build -w @ai-cowork/orchestrator"
+    "build": "npm run build:shared && npm run build -w @ai-cowork/orchestrator",
+    "dev:desktop": "npm run dev -w @ai-cowork/desktop",
+    "build:desktop": "npm run build -w @ai-cowork/desktop",
+    "dist:desktop": "npm run dist -w @ai-cowork/desktop",
+    "dist:desktop:win": "npm run dist:win -w @ai-cowork/desktop"
   }
 }

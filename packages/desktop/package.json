@@ -1,0 +1,30 @@
+{
+  "name": "@ai-cowork/desktop",
+  "version": "0.0.1",
+  "private": true,
+  "description": "AI Cowork 桌面端 - Electron 封装",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "npm run build && chcp 65001 > nul && electron .",
+    "build": "tsc && tsc -p tsconfig.preload.json",
+    "build:main": "tsc",
+    "build:preload": "tsc -p tsconfig.preload.json",
+    "start": "electron .",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:linux": "npm run build && electron-builder --linux"
+  },
+  "dependencies": {
+    "@ai-cowork/shared": "workspace:*",
+    "@ai-cowork/orchestrator": "workspace:*",
+    "@ai-cowork/web": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.5.4"
+  }
+}

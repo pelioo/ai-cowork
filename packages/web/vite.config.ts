@@ -13,8 +13,7 @@ export default defineConfig({
   server: {
     port: 3000,
     host: "0.0.0.0",
-    // 浏览器经预览代理访问 web(3000)，无法直连 orchestrator(3001)。
-    // 通过 Vite 代理把 /ws、/preview/* 转发到同主机的 orchestrator。
+    // Vite 代理配置：/ws 和 /preview/* 转发到同主机的 orchestrator(3001)
     proxy: {
       "/ws": {
         target: "ws://localhost:3001",

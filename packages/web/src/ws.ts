@@ -233,7 +233,8 @@ function handleEvent(ev: ServerEvent) {
       }
       break;
     default:
-      // message_start/end 等不单独显示
+      // 未处理的事件类型，记录警告便于调试
+      console.warn('[ws] 未处理的事件类型:', (ev as { type: string }).type);
       break;
   }
 }
